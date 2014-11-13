@@ -151,6 +151,15 @@ func mooCharacter(rect:CGRect){
 ```
 [full swift file](../moo.swift)
 
+#####ios
+after adding the following to some UIView
+```swift
+override func drawRect(rect: CGRect) {
+    moo(rect)
+}
+```
+you should see
+![moo_ios png](https://github.com/Charimon/iosViews/blob/master/moo_ios.png?raw=true "moo_ios.png")
 
 ###export_as_uiView
 currently does nothing, I want this to export things as tagged UIView's where the tag is the name of the group
