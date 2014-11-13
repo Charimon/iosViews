@@ -47,6 +47,8 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 - text decoration and list types are ignored
 - text weight is ignored
 - typeface might be iffy (I've only tested Helvetica Neue, and that's what ios defaults to if it can't find your typeface)
+- even/odd setting on fill is ignored (it uses whatever ios uses, I don't know if it's even/odd or non zero by default)
+- all border settings (ends, joints, start arrow, end arrow, dash, gap) are ignored
 
 ###export_as_uiView
 currently does nothing, I want this to export things as tagged UIView's where the tag is the name of the group
