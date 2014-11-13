@@ -1,9 +1,6 @@
 // (ctrl alt cmd p)
 //doc, selection, scriptPath
 
-var strokeMultiplier = 0
-//var fontMultiplier = 0
-
 main()
 
 function main() {
@@ -12,7 +9,6 @@ function main() {
     parseSelection(item)
   }
 }
-
 
 function parseSelection(selection){
   var str = drawLayerGroup(selection, selection.frame(), 0, 0)
@@ -99,40 +95,62 @@ function drawCGShapePath(shapeGroup, boundingWidth, boundingHeight, offsetX, off
   for(var i = 0; i<count; i++) {
     var point = points.objectAtIndex(i)
     var p = point.point()
-    var px = p.x*shapeFrame.width() + shapeFrame.x() + offsetX
+    var px = round(p.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
     var py = p.y*shapeFrame.height() + shapeFrame.y() + offsetY
 
     var cp2 = point.curveTo()
-    var cp2x = cp2.x*shapeFrame.width() + shapeFrame.x() + offsetX
-    var cp2y = cp2.y*shapeFrame.height() + shapeFrame.y() + offsetY
+    if(!point.hasCurveTo()) { cp2 = p }
+
+    var cp2x = round(cp2.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
+    var cp2y = round(cp2.y*shapeFrame.height()) + round(shapeFrame.y()) + offsetY
 
     if(i == 0) {
       str += "\tCGContextMoveToPoint(ctx, " + px + widthRatio + ", " + py + heightRatio + ")\n"
     } else {
       var cp1 = points.objectAtIndex(i - 1).curveFrom()
-      var cp1x = cp1.x*shapeFrame.width() + shapeFrame.x() + offsetX
-      var cp1y = cp1.y*shapeFrame.height() + shapeFrame.y() + offsetY
+
+      if(!points.objectAtIndex(i - 1).hasCurveFrom()) {
+        cp1 = points.objectAtIndex(i - 1).point() 
+      }
+
+      var cp1x = round(cp1.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
+      var cp1y = round(cp1.y*shapeFrame.height()) + round(shapeFrame.y()) + offsetY
+
 
       str += "\tCGContextAddCurveToPoint(ctx, " + cp1x + widthRatio + ", " + cp1y + heightRatio + ", " + cp2x + widthRatio + ", " + cp2y + heightRatio + ", " + px + widthRatio + ", " + py + heightRatio + ")\n"
     }
   }
 
   var p0 = points.objectAtIndex(0).point()
-  var p0x = p0.x*shapeFrame.width() + shapeFrame.x() + offsetX
-  var p0y = p0.y*shapeFrame.height() + shapeFrame.y() + offsetY
+  var p0x = round(p0.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
+  var p0y = round(p0.y*shapeFrame.height()) + round(shapeFrame.y()) + offsetY
 
   var cp2 = points.objectAtIndex(0).curveTo()
-  var cp2x = cp2.x*shapeFrame.width() + shapeFrame.x() + offsetX
-  var cp2y = cp2.y*shapeFrame.height() + shapeFrame.y() + offsetY
+  if(!points.objectAtIndex(0).hasCurveTo()) {
+    cp2 = points.objectAtIndex(0).point() 
+  }
+  var cp2x = round(cp2.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
+  var cp2y = round(cp2.y*shapeFrame.height()) + round(shapeFrame.y()) + offsetY
 
   var cp1 = points.objectAtIndex(points.count() - 1).curveFrom()
-  var cp1x = cp1.x*shapeFrame.width() + shapeFrame.x() + offsetX
-  var cp1y = cp1.y*shapeFrame.height() + shapeFrame.y() + offsetY
+  if(!points.objectAtIndex(points.count() - 1).hasCurveFrom()) {
+    cp1 = points.objectAtIndex(points.count() - 1).point() 
+  }
+
+  var cp1x = round(cp1.x*shapeFrame.width()) + round(shapeFrame.x()) + offsetX
+  var cp1y = round(cp1.y*shapeFrame.height()) + round(shapeFrame.y()) + offsetY
+  
+  var p = points.objectAtIndex(points.count() - 1)
+  var pp = p.point()
+
+  log("(" + cp1x + ", " + cp1y + ")")
+  log("(" + cp2x + ", " + cp2y + ")")
+  log("(" + p0x + ", " + p0y + ")")
 
   //draw path back to first point
   str += "\tCGContextAddCurveToPoint(ctx, " + cp1x + widthRatio + ", " + cp1y + heightRatio + ", " + cp2x + widthRatio + ", " + cp2y + heightRatio + ", " + p0x + widthRatio + ", " + p0y + heightRatio + ")\n"
 
-  var stroke = extractStroke(shapeGroup)
+  var stroke = extractStroke(shapeGroup, boundingWidth, boundingHeight)
   var fill = extractFill(shapeGroup)
 
   str += stroke
@@ -174,14 +192,11 @@ function drawTextLayer(textLayer, boundingFrame, offsetX, offsetY) {
 }
 
 function drawAttributes(textLayer, boundingFrame) {
-  //if(fontMultiplier == 0) showFontMultiplerPopup()
-
   var boundingWidth = boundingFrame.width()
   var widthRatio = "*(width/" + boundingWidth + ")"
 
   var str = ""
   var color = textLayer.textColor()
-  //str += "NSFontAttributeName: UIFont(name: \"" + textLayer.fontPostscriptName() + "\", size: " + textLayer.fontSize()/fontMultiplier + widthRatio + ")!"
   str += "NSFontAttributeName: UIFont(name: \"" + textLayer.fontPostscriptName() + "\", size: " + textLayer.fontSize() + widthRatio + ")!"
   str +=", NSForegroundColorAttributeName: UIColor(hue: " + color.hue() + ", saturation: " + color.saturation() + ", brightness: " + color.brightness() + ", alpha: " + color.alpha() + ")"
 
@@ -195,17 +210,16 @@ function drawAttributes(textLayer, boundingFrame) {
 /*
   will grab the first available fill (has to be a solid color and enabled)
 */
-function extractStroke(shapeGroup) {
+function extractStroke(shapeGroup, boundingWidth, boundingHeight) {
   var stroke = ""
   var strokes = shapeGroup.style().borders()
   for(var i=0; i<strokes.count(); i++) {
     var item = strokes.objectAtIndex(i)
     if(item.isEnabled() && item.fillType() == 0 && item.position() == 0) {
-      if(strokeMultiplier == 0) showStrokeMultiplerPopup()
-
+      var thicknessMult = "*min(width/" + boundingWidth + ", height/" + boundingHeight + ")"
       var color = item.color()
       stroke = "\tCGContextSetStrokeColorWithColor(ctx, UIColor(hue: " + color.hue() + ", saturation: " + color.saturation() + ", brightness: " + color.brightness() + ", alpha: " + color.alpha() + ").CGColor)\n"
-      stroke += "\tCGContextSetLineWidth(ctx, " + item.thickness()/strokeMultiplier + ")\n"
+      stroke += "\tCGContextSetLineWidth(ctx, " + item.thickness() + thicknessMult + ")\n"
       break
     }
   }
@@ -226,35 +240,13 @@ function extractFill(shapeGroup) {
   return fill
 }
 
-function showStrokeMultiplerPopup() {
-  var accessory = NSComboBox.alloc().initWithFrame(NSMakeRect(0,0,100,25))
-  accessory.addItemsWithObjectValues(["@1x", "@2x", "@3x"])
-  accessory.selectItemAtIndex(1)
-
-  var alert = NSAlert.alloc().init()
-  alert.setMessageText("You are exporting things with borders, please select the scaling factor for the borders (@1x @2x @3x)")
-  alert.addButtonWithTitle('OK')
-  alert.setAccessoryView(accessory)
-
-  alert.runModal()
-  strokeMultiplier = accessory.indexOfSelectedItem() + 1
-}
-
-function showFontMultiplerPopup() {
-  var accessory = NSComboBox.alloc().initWithFrame(NSMakeRect(0,0,100,25))
-  accessory.addItemsWithObjectValues(["@1x", "@2x", "@3x"])
-  accessory.selectItemAtIndex(1)
-
-  var alert = NSAlert.alloc().init()
-  alert.setMessageText("You are exporting things with fonts, please select the scaling factor for the fonts (@1x @2x @3x)")
-  alert.addButtonWithTitle('OK')
-  alert.setAccessoryView(accessory)
-
-  alert.runModal()
-  fontMultiplier = accessory.indexOfSelectedItem() + 1
-}
-
 function safeName(layer) {
   var name = layer.name()
   return name.stringByReplacingOccurrencesOfString_withString_(" ", "_")
+}
+
+function round(value, decimals) {
+  if(decimals == null) decimals = 2
+  var power = Math.pow(10, decimals)
+  return Math.round(value * power)/power
 }
