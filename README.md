@@ -51,5 +51,16 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 1. even/odd setting on fill is ignored (it uses whatever ios uses, I don't know if it's even/odd or non zero by default)
 1. all border settings (ends, joints, start arrow, end arrow, dash, gap) are ignored
 
+####TODO:
+- fix a lot of the things that don't work
+- settle on a good shortcut
+- add this to sketch toolbox
+- make it export to a file, rather than cliboard (which is currently makes the pasting teeeerribly slow)
+
+####Example
+#####Sketch File
+![Moo png](https://github.com/Charimon/iosViews/blob/master/Moo.png?raw=true "Moo.png")
+
+
 ###export_as_uiView
 currently does nothing, I want this to export things as tagged UIView's where the tag is the name of the group
