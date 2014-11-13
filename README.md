@@ -62,6 +62,7 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 ![moo png](https://github.com/Charimon/iosViews/blob/master/moo.png?raw=true "moo.png")
 
 #####Generated Code
+```swift
     func moo(rect:CGRect){
         let ctx = UIGraphicsGetCurrentContext()
         let width = rect.width
@@ -664,7 +665,7 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
         CGContextDrawPath(ctx, kCGPathFill)
         CGContextRestoreGState(ctx)
       }
- 
+```
 
 ###export_as_uiView
 currently does nothing, I want this to export things as tagged UIView's where the tag is the name of the group
