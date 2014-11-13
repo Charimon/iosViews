@@ -6,9 +6,10 @@ Sketch plugin to generate ios view code
 ###export_as_cgContext.sketchplugin
 exports your views as CGContext as swift code
 so you'll have something like
-  CGContextMoveToPoint(...)
-  CGContextAddCurveToPoint(...)
-  ...
+
+    CGContextMoveToPoint(...)
+    CGContextAddCurveToPoint(...)
+    ...
 
 ####Why?
 It's very annoying to draw in ios in code. But it's annoying to draw in sketch and export it as a picture because you can no longer use the CGRect dimensions from ios. You're stuck with whatever dimensions you picked in sketch.
@@ -26,6 +27,7 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 1. create some shape you want that you'd have to do in code otherwise
 1. select the artboard (make sure it's only the artboard, this is very important)
 1. run the export_as_cgContext plugin
+  - anything hidden will be ignored
   - you will get code where everything is relative to the selection (artboard in this case)
   - for each group in the selection, the plugin will generate a swift function named after the group (make sure these are unique)
   - NOTE: for complex shapes the export might be slow (take minutes)
@@ -34,10 +36,17 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 - boolean operations (union, subtract, intersect, difference)
 - radius on object (set the radius on individual path instead of object... click enter > highlight points > set radius)
 - opacity on object (set your opacity on the color directly, and it will work)
+- transformation on the object (flatten them all, if you have a rotated group, ungroup it then flatten it, that way your rotation will be preserved)
 - any color that isn't a solid (gradients, fills don't work)
-- more than 1 border or fill (only the last border and last fill are set) 
+- more than 1 border or fill (only the last valid border and last valid fill are set, valid = center borders with solid color)
+- inside, outside borders don't work and are ignored (only center border works)
 - blending (will always be treated as "normal")
-- shadows, inner shadows, blurs, reflections (will be ignored)
+- shadows, inner shadows, blurs, reflections are ignored
+- character spacing, line height, paragraph spacing are ignored
+- justified alignment is ignored
+- text decoration and list types are ignored
+- text weight is ignored
+- typeface might be iffy (I've only tested Helvetica Neue, and that's what ios defaults to if it can't find your typeface)
 
 ###export_as_uiView
 currently does nothing, I want this to export things as tagged UIView's where the tag is the name of the group
