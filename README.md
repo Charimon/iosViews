@@ -32,7 +32,6 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
   - you will get code where everything is relative to the selection (artboard in this case)
   - for each group in the selection, the plugin will generate a swift function named after the group (make sure these are unique)
   - NOTE: for complex shapes the export might be slow (take minutes)
-1. NOTE: I would advise not using borders since I don't know what to base the border size off (width, height) to scale it for 1x, 2x, 3x, so currently the border width might be iffy
 
 ####Unfortunatelly this doesn't work with:
 1. boolean operations (union, subtract, intersect, difference)
@@ -42,7 +41,6 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 1. any color that isn't a solid (gradients, fills don't work)
 1. more than 1 border or fill (only the last valid border and last valid fill are set, valid = center borders with solid color)
 1. inside, outside borders don't work and are ignored (only center border works)
-1. center border might be iffy since I'm not sure how to best scale it based on width or height or both with respect to the screen
 1. blending (will always be treated as "normal")
 1. shadows, inner shadows, blurs, reflections are ignored
 1. character spacing, line height, paragraph spacing are ignored
