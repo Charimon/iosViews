@@ -63,89 +63,42 @@ Once I figure out how to make sketch save it to a file and NOT crash sketch, I'l
 
 #####Generated Code
 ```swift
-func mooCharacter(rect:CGRect){
-    let ctx = UIGraphicsGetCurrentContext()
-    let width = rect.width
-    let height = rect.height
-    var pstyleRightAlign = NSMutableParagraphStyle()
-    pstyleRightAlign.alignment = NSTextAlignment.Right
-    var pstyleLeftAlign = NSMutableParagraphStyle()
-    pstyleLeftAlign.alignment = NSTextAlignment.Left
-    var pstyleCenterAlign = NSMutableParagraphStyle()
-    pstyleCenterAlign.alignment = NSTextAlignment.Center
-    
-    //signOutline
-    CGContextSaveGState(ctx)
-    CGContextMoveToPoint(ctx, 701.1646408974227*(width/1024), 304.41210454708494*(height/1024))
-    CGContextAddCurveToPoint(ctx, 701.1646408974227*(width/1024), 304.41210454708494*(height/1024), 665.7105808309632*(width/1024), 486.80743164444164*(height/1024), 665.7105808309632*(width/1024), 486.80743164444164*(height/1024))
-    CGContextAddCurveToPoint(ctx, 665.078097732375*(width/1024), 490.06127510931685*(height/1024), 667.2089244827171*(width/1024), 493.2128915680838*(height/1024), 670.4551319756478*(width/1024), 493.8438903840849*(height/1024))
-    CGContextAddCurveToPoint(ctx, 673.7079583160914*(width/1024), 494.47617577371165*(height/1024), 676.8580577727232*(width/1024), 492.3487511457879*(height/1024), 677.4901070323351*(width/1024), 489.0971395889602*(height/1024))
-    CGContextAddCurveToPoint(ctx, 677.4901070323351*(width/1024), 489.0971395889602*(height/1024), 712.9441670987947*(width/1024), 306.70181249160345*(height/1024), 712.9441670987947*(width/1024), 306.70181249160345*(height/1024))
-    CGContextAddCurveToPoint(ctx, 712.9441670987947*(width/1024), 306.70181249160345*(height/1024), 795.6868596598813*(width/1024), 322.7853626505146*(height/1024), 795.6868596598813*(width/1024), 322.7853626505146*(height/1024))
-    CGContextAddCurveToPoint(ctx, 802.190795859518*(width/1024), 324.049599779612*(height/1024), 808.4885516536424*(width/1024), 319.79989024586723*(height/1024), 809.7546183233745*(width/1024), 313.28654187561085*(height/1024))
-    CGContextAddCurveToPoint(ctx, 809.7546183233745*(width/1024), 313.28654187561085*(height/1024), 827.1149719389618*(width/1024), 223.97526496387604*(height/1024), 827.1149719389618*(width/1024), 223.97526496387604*(height/1024))
-    CGContextAddCurveToPoint(ctx, 828.3804443130394*(width/1024), 217.4649739797159*(height/1024), 824.1276421302414*(width/1024), 211.16127081937216*(height/1024), 817.6298941281839*(width/1024), 209.89823655403328*(height/1024))
-    CGContextAddCurveToPoint(ctx, 817.6298941281839*(width/1024), 209.89823655403328*(height/1024), 641.9124123625793*(width/1024), 175.74221812753365*(height/1024), 641.9124123625793*(width/1024), 175.74221812753365*(height/1024))
-    CGContextAddCurveToPoint(ctx, 635.4084761629427*(width/1024), 174.47798099843627*(height/1024), 629.1107203688182*(width/1024), 178.72769053218101*(height/1024), 627.844653699086*(width/1024), 185.24103890243742*(height/1024))
-    CGContextAddCurveToPoint(ctx, 627.844653699086*(width/1024), 185.24103890243742*(height/1024), 610.4843000834987*(width/1024), 274.55231581417223*(height/1024), 610.4843000834987*(width/1024), 274.55231581417223*(height/1024))
-    CGContextAddCurveToPoint(ctx, 609.2188277094211*(width/1024), 281.06260679833235*(height/1024), 613.4716298922193*(width/1024), 287.3663099586761*(height/1024), 619.9693778942767*(width/1024), 288.629344224015*(height/1024))
-    CGContextAddCurveToPoint(ctx, 619.9693778942767*(width/1024), 288.629344224015*(height/1024), 701.1646408974227*(width/1024), 304.4121045470849*(height/1024), 701.1646408974227*(width/1024), 304.4121045470849*(height/1024))
-    CGContextAddCurveToPoint(ctx, 701.1646408974227*(width/1024), 304.4121045470849*(height/1024), 701.1646408974227*(width/1024), 304.41210454708494*(height/1024), 701.1646408974227*(width/1024), 304.41210454708494*(height/1024))
-    CGContextSetStrokeColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 1, alpha: 1).CGColor)
-    CGContextSetLineWidth(ctx, 14)
-    CGContextSetFillColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 1, alpha: 1).CGColor)
-    CGContextDrawPath(ctx, kCGPathFillStroke)
-    CGContextRestoreGState(ctx)
-    
-    mooCharacter(rect)
-    
-    //Rectangle_9
-    CGContextSaveGState(ctx)
-    CGContextMoveToPoint(ctx, 708.8080712631094*(width/1024), 296.5333866933708*(height/1024))
-    CGContextAddCurveToPoint(ctx, 705.5552449226657*(width/1024), 295.90110130374404*(height/1024), 702.4051454660339*(width/1024), 298.02852593166784*(height/1024), 701.773096206422*(width/1024), 301.28013748849554*(height/1024))
-    CGContextAddCurveToPoint(ctx, 701.773096206422*(width/1024), 301.28013748849554*(height/1024), 665.7109120477392*(width/1024), 486.803991826708*(height/1024), 665.7109120477392*(width/1024), 486.803991826708*(height/1024))
-    CGContextAddCurveToPoint(ctx, 665.078428949151*(width/1024), 490.05783529158316*(height/1024), 667.209255699493*(width/1024), 493.2094517503502*(height/1024), 670.4554631924238*(width/1024), 493.84045056635125*(height/1024))
-    CGContextAddCurveToPoint(ctx, 670.4554631924238*(width/1024), 493.84045056635125*(height/1024), 670.4554631924238*(width/1024), 493.84045056635125*(height/1024), 670.4554631924238*(width/1024), 493.84045056635125*(height/1024))
-    CGContextAddCurveToPoint(ctx, 673.7082895328674*(width/1024), 494.472735955978*(height/1024), 676.8583889894992*(width/1024), 492.3453113280542*(height/1024), 677.4904382491112*(width/1024), 489.0936997712265*(height/1024))
-    CGContextAddCurveToPoint(ctx, 677.4904382491112*(width/1024), 489.0936997712265*(height/1024), 713.5526224077939*(width/1024), 303.56984543301405*(height/1024), 713.5526224077939*(width/1024), 303.56984543301405*(height/1024))
-    CGContextAddCurveToPoint(ctx, 714.1851055063821*(width/1024), 300.3160019681389*(height/1024), 712.05427875604*(width/1024), 297.16438550937187*(height/1024), 708.8080712631094*(width/1024), 296.5333866933708*(height/1024))
-    CGContextAddCurveToPoint(ctx, 708.8080712631094*(width/1024), 296.5333866933708*(height/1024), 708.8080712631094*(width/1024), 296.5333866933708*(height/1024), 708.8080712631094*(width/1024), 296.5333866933708*(height/1024))
-    CGContextAddCurveToPoint(ctx, 708.8080712631094*(width/1024), 296.5333866933708*(height/1024), 708.8080712631094*(width/1024), 296.5333866933708*(height/1024), 708.8080712631094*(width/1024), 296.5333866933708*(height/1024))
-    CGContextSetFillColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 0.10196078431372549, alpha: 1).CGColor)
-    CGContextDrawPath(ctx, kCGPathFill)
-    CGContextRestoreGState(ctx)
-    
-    //Rectangle_8
-    CGContextSaveGState(ctx)
-    CGContextMoveToPoint(ctx, 641.9304399074972*(width/1024), 175.74221812753387*(height/1024))
-    CGContextAddCurveToPoint(ctx, 635.4265037078607*(width/1024), 174.4779809984365*(height/1024), 629.1287479137361*(width/1024), 178.72769053218124*(height/1024), 627.862681244004*(width/1024), 185.24103890243765*(height/1024))
-    CGContextAddCurveToPoint(ctx, 627.862681244004*(width/1024), 185.24103890243765*(height/1024), 610.5023276284167*(width/1024), 274.55231581417246*(height/1024), 610.5023276284167*(width/1024), 274.55231581417246*(height/1024))
-    CGContextAddCurveToPoint(ctx, 609.236855254339*(width/1024), 281.0626067983326*(height/1024), 613.4896574371372*(width/1024), 287.3663099586763*(height/1024), 619.9874054391946*(width/1024), 288.6293442240152*(height/1024))
-    CGContextAddCurveToPoint(ctx, 619.9874054391946*(width/1024), 288.6293442240152*(height/1024), 795.7048872047992*(width/1024), 322.7853626505148*(height/1024), 795.7048872047992*(width/1024), 322.7853626505148*(height/1024))
-    CGContextAddCurveToPoint(ctx, 802.2088234044359*(width/1024), 324.0495997796121*(height/1024), 808.5065791985603*(width/1024), 319.79989024586746*(height/1024), 809.7726458682924*(width/1024), 313.286541875611*(height/1024))
-    CGContextAddCurveToPoint(ctx, 809.7726458682924*(width/1024), 313.286541875611*(height/1024), 827.1329994838798*(width/1024), 223.97526496387624*(height/1024), 827.1329994838798*(width/1024), 223.97526496387624*(height/1024))
-    CGContextAddCurveToPoint(ctx, 828.3984718579574*(width/1024), 217.4649739797161*(height/1024), 824.1456696751593*(width/1024), 211.1612708193724*(height/1024), 817.6479216731018*(width/1024), 209.89823655403347*(height/1024))
-    CGContextAddCurveToPoint(ctx, 817.6479216731018*(width/1024), 209.89823655403347*(height/1024), 641.9304399074972*(width/1024), 175.74221812753387*(height/1024), 641.9304399074972*(width/1024), 175.74221812753387*(height/1024))
-    CGContextAddCurveToPoint(ctx, 641.9304399074972*(width/1024), 175.74221812753387*(height/1024), 641.9304399074972*(width/1024), 175.74221812753387*(height/1024), 641.9304399074972*(width/1024), 175.74221812753387*(height/1024))
-    CGContextSetFillColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1).CGColor)
-    CGContextDrawPath(ctx, kCGPathFill)
-    CGContextRestoreGState(ctx)
-    
-    //Rectangle_10
-    CGContextSaveGState(ctx)
-    CGContextMoveToPoint(ctx, 643.5431349420359*(width/1024), 183.18671115157872*(height/1024))
-    CGContextAddCurveToPoint(ctx, 639.2058296446985*(width/1024), 182.34362440705763*(height/1024), 635.0066916794686*(width/1024), 185.1741927757099*(height/1024), 634.1614218167298*(width/1024), 189.52272924264165*(height/1024))
-    CGContextAddCurveToPoint(ctx, 634.1614218167298*(width/1024), 189.52272924264165*(height/1024), 617.9463676239584*(width/1024), 272.9419514092399*(height/1024), 617.9463676239584*(width/1024), 272.9419514092399*(height/1024))
-    CGContextAddCurveToPoint(ctx, 617.1022958351907*(width/1024), 277.28432431991195*(height/1024), 619.9380960509927*(width/1024), 281.4887425852065*(height/1024), 624.2714264090048*(width/1024), 282.33105667979277*(height/1024))
-    CGContextAddCurveToPoint(ctx, 624.2714264090048*(width/1024), 282.33105667979277*(height/1024), 794.0921921702608*(width/1024), 315.3408696264698*(height/1024), 794.0921921702608*(width/1024), 315.3408696264698*(height/1024))
-    CGContextAddCurveToPoint(ctx, 798.4294974675981*(width/1024), 316.1839563709909*(height/1024), 802.628635432828*(width/1024), 313.35338800233853*(height/1024), 803.4739052955669*(width/1024), 309.0048515354069*(height/1024))
-    CGContextAddCurveToPoint(ctx, 803.4739052955669*(width/1024), 309.0048515354069*(height/1024), 819.6889594883382*(width/1024), 225.5856293688086*(height/1024), 819.6889594883382*(width/1024), 225.5856293688086*(height/1024))
-    CGContextAddCurveToPoint(ctx, 820.5330312771059*(width/1024), 221.24325645813656*(height/1024), 817.6972310613039*(width/1024), 217.03883819284198*(height/1024), 813.3639007032918*(width/1024), 216.19652409825574*(height/1024))
-    CGContextAddCurveToPoint(ctx, 813.3639007032918*(width/1024), 216.19652409825574*(height/1024), 643.5431349420359*(width/1024), 183.18671115157872*(height/1024), 643.5431349420359*(width/1024), 183.18671115157872*(height/1024))
-    CGContextAddCurveToPoint(ctx, 643.5431349420359*(width/1024), 183.18671115157872*(height/1024), 643.5431349420359*(width/1024), 183.18671115157872*(height/1024), 643.5431349420359*(width/1024), 183.18671115157872*(height/1024))
-    CGContextSetFillColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 1, alpha: 1).CGColor)
-    CGContextDrawPath(ctx, kCGPathFill)
-    CGContextRestoreGState(ctx)
+func mooWithSign(rect:CGRect){
+  let ctx = UIGraphicsGetCurrentContext()
+  let width = rect.width
+  let height = rect.height
+  var pstyleRightAlign = NSMutableParagraphStyle()
+  pstyleRightAlign.alignment = NSTextAlignment.Right
+  var pstyleLeftAlign = NSMutableParagraphStyle()
+  pstyleLeftAlign.alignment = NSTextAlignment.Left
+  var pstyleCenterAlign = NSMutableParagraphStyle()
+  pstyleCenterAlign.alignment = NSTextAlignment.Center
+  
+  outline(rect)
+  
+  body(rect)
+  
+  //sign
+  CGContextSaveGState(ctx)
+  CGContextMoveToPoint(ctx, 611.29*(width/1024), 267.75570408534463*(height/1024))
+  CGContextAddCurveToPoint(ctx, 605.87*(width/1024), 266.7*(height/1024), 602.33*(width/1024), 261.45*(height/1024), 603.38*(width/1024), 256.0305932082729*(height/1024))
+  CGContextAddCurveToPoint(ctx, 603.38*(width/1024), 256.03*(height/1024), 618.65*(width/1024), 177.5*(height/1024), 618.65*(width/1024), 177.5005438434377*(height/1024))
+  CGContextAddCurveToPoint(ctx, 619.7*(width/1024), 172.08*(height/1024), 624.95*(width/1024), 168.54*(height/1024), 630.37*(width/1024), 169.59298574057823*(height/1024))
+  CGContextAddCurveToPoint(ctx, 630.37*(width/1024), 169.59*(height/1024), 807.06*(width/1024), 203.94*(height/1024), 807.06*(width/1024), 203.93723204167492*(height/1024))
+  CGContextAddCurveToPoint(ctx, 812.48*(width/1024), 204.99*(height/1024), 816.03*(width/1024), 210.24*(height/1024), 814.97*(width/1024), 215.66234291874667*(height/1024))
+  CGContextAddCurveToPoint(ctx, 814.97*(width/1024), 215.66*(height/1024), 799.71*(width/1024), 294.19*(height/1024), 799.71*(width/1024), 294.19239228358185*(height/1024))
+  CGContextAddCurveToPoint(ctx, 798.65*(width/1024), 299.62*(height/1024), 793.4*(width/1024), 303.15*(height/1024), 787.98*(width/1024), 302.09995038644126*(height/1024))
+  CGContextAddCurveToPoint(ctx, 787.98*(width/1024), 302.1*(height/1024), 701.6*(width/1024), 285.31*(height/1024), 701.6*(width/1024), 285.30944522664595*(height/1024))
+  CGContextAddCurveToPoint(ctx, 701.6*(width/1024), 285.31*(height/1024), 663.53*(width/1024), 481.13*(height/1024), 663.53*(width/1024), 481.13443929250855*(height/1024))
+  CGContextAddCurveToPoint(ctx, 663.37*(width/1024), 481.96*(height/1024), 662.59*(width/1024), 482.49*(height/1024), 661.77*(width/1024), 482.33029560656144*(height/1024))
+  CGContextAddCurveToPoint(ctx, 660.96*(width/1024), 482.17*(height/1024), 660.43*(width/1024), 481.38*(height/1024), 660.59*(width/1024), 480.56201230637885*(height/1024))
+  CGContextAddCurveToPoint(ctx, 660.59*(width/1024), 480.56*(height/1024), 698.65*(width/1024), 284.74*(height/1024), 698.65*(width/1024), 284.73701824051636*(height/1024))
+  CGContextAddCurveToPoint(ctx, 698.65*(width/1024), 284.74*(height/1024), 611.29*(width/1024), 267.76*(height/1024), 611.29*(width/1024), 267.76*(height/1024))
+  CGContextSetStrokeColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1).CGColor)
+  CGContextSetLineWidth(ctx, 8*min(width/1024, height/1024))
+  CGContextSetFillColorWithColor(ctx, UIColor(hue: 0, saturation: 0, brightness: 1, alpha: 1).CGColor)
+  CGContextDrawPath(ctx, kCGPathFillStroke)
+  CGContextRestoreGState(ctx)
 }
 ...
 ```
