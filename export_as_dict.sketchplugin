@@ -1,0 +1,37 @@
+// (ctrl alt cmd d)
+//doc, selection, scriptPath
+#import 'lib/common.js'
+
+main()
+
+function main() {
+  var loop = selection.objectEnumerator()
+  var str = ""
+  while(item = loop.nextObject()) {
+    str += processSelection(item, item.frame(), 0, 0)
+  }
+
+  paste(str)
+}
+
+function processSelection(layer, boundingFrame, offsetX, offsetY) {
+  if(!layer.isVisible()) return ""
+
+  var str = "let {{0}}Map = [".format(safeName(layer))
+  var kvPairs = []
+  var views = []
+  forEach(layer.layers(), function(item, i){if(item.isVisible()) {
+    if(isShape(item)) {
+      var frame = item.frame()
+      //kvPairs.push("\"{{0}}\":NSValue(CGRect: CGRect(x:{{1}}, y:{{2}}, width:{{3}}, height:{{4}}))".format(safeName(item), frame.x(), frame.y(), frame.width(), frame.height()))
+      kvPairs.push("\"{{0}}\":({{1}},{{2}},{{3}},{{4}})".format( safeName(item), frame.x(), frame.y(), frame.width(), frame.height() ))
+      views.push("\"{{0}}\"".format(safeName(item)))
+    }
+  }})
+
+  str += kvPairs.join(",\n") + "]\n"
+  str += "let {{0}}Keys = [{{1}}]\n".format(safeName(item), views.join(", "))
+  str += "let {{0}}Width = {{1}}\n".format(safeName(item), layer.frame().width())
+  str += "let {{0}}Height = {{1}}\n".format(safeName(item), layer.frame().height())
+  return str
+}
