@@ -1,0 +1,196 @@
+// (ctrl alt cmd [)
+//doc, selection, scriptPath
+#import 'lib/common.js'
+
+main()
+
+function main() {
+  var loop = selection.objectEnumerator();
+  var lines = [];
+  while(item = loop.nextObject()) {
+    lines.push(processGroup(item, item, 0, 0));
+  }
+
+  paste( arrayToString(lines) );
+}
+
+function processShape(layer, boundingLayer, offsetX, offsetY) {
+  if(hasSubShapes(layer)) { alert("warning: union, subtract, etc not supported"); }
+  else {
+    var points = layer.firstLayer().path().points();
+    var lines = [];
+
+    for(var i=0; i<points.count(); i++) {
+      var item = points.objectAtIndex(i);
+      var p = item.point();
+      var px = p.x * layer.frame().width() + layer.frame().x() + offsetX;
+      var py = p.y * layer.frame().height() + layer.frame().y() + offsetY;
+
+      var pT = item.curveTo();
+      if(!item.hasCurveTo()){
+        pT = p;
+      }
+      var pTx = pT.x * layer.frame().width() + layer.frame().x() + offsetX;
+      var pTy = pT.y * layer.frame().height() + layer.frame().y() + offsetY;
+
+      if(i == 0){
+        lines.push("CGContextMoveToPoint(ctx, {{0}}*(width/{{2}}), {{1}}*(height/{{3}}))".format(round(px), round(py), round(boundingLayer.frame().width()), round(boundingLayer.frame().height()) ))
+      } else {
+        var pF = points.objectAtIndex(i - 1).curveFrom()
+
+        if(!points.objectAtIndex(i - 1).hasCurveFrom()){
+          pF = points.objectAtIndex(i - 1).point()
+        }
+        var pFx = pF.x * layer.frame().width() + layer.frame().x() + offsetX;
+        var pFy = pF.y * layer.frame().height() + layer.frame().y() + offsetY;
+        lines.push("CGContextAddCurveToPoint(ctx, {{0}}*(width/{{6}}), {{1}}*(height/{{7}}), {{2}}*(width/{{6}}), {{3}}*(height/{{7}}), {{4}}*(width/{{6}}), {{5}}*(height/{{7}}))".format(round(pFx), round(pFy), round(pTx), round(pTy), round(px), round(py), round(boundingLayer.frame().width()), round(boundingLayer.frame().height())))
+      }
+    }
+
+    var p0 = points.objectAtIndex(0).point();
+    var px = p0.x * layer.frame().width() + layer.frame().x() + offsetX;
+    var py = p0.y * layer.frame().height() + layer.frame().y() + offsetY;
+
+    var pT = points.objectAtIndex(0).curveTo();
+    if(!points.objectAtIndex(0).hasCurveTo()){
+      pT = points.objectAtIndex(0).point();
+    }
+    var pTx = pT.x * layer.frame().width() + layer.frame().x() + offsetX;
+    var pTy = pT.y * layer.frame().height() + layer.frame().y() + offsetY;
+
+    var pF = points.objectAtIndex(points.count() - 1).curveFrom();
+    if(!points.objectAtIndex(points.count() - 1).hasCurveFrom()){
+      pF = points.objectAtIndex(points.count() - 1).point();
+    }
+    var pFx = pF.x * layer.frame().width() + layer.frame().x() + offsetX;
+    var pFy = pF.y * layer.frame().height() + layer.frame().y() + offsetY;
+
+    lines.push("CGContextAddCurveToPoint(ctx, {{0}}*(width/{{6}}), {{1}}*(height/{{7}}), {{2}}*(width/{{6}}), {{3}}*(height/{{7}}), {{4}}*(width/{{6}}), {{5}}*(height/{{7}}))".format(round(pFx), round(pFy), round(pTx), round(pTy), round(px), round(py), round(boundingLayer.frame().width()), round(boundingLayer.frame().height())));
+
+    var strokeLines = processStroke(layer, boundingLayer);
+    var fillLines = processFill(layer);
+
+    lines = lines.concat(strokeLines);
+    lines = lines.concat(fillLines);
+
+    if(strokeLines.length > 0 && fillLines.length > 0) mode = "kCGPathFillStroke";
+    else if(strokeLines.length > 0) mode = "kCGPathStroke";
+    else if(fillLines.length > 0) mode = "kCGPathFill";
+
+    if(mode) lines.push("CGContextDrawPath(ctx, {{0}})".format(mode));
+
+    if(lines.length > 0) {
+      lines.unshift("CGContextSaveGState(ctx)");
+      lines.push("CGContextRestoreGState(ctx)");
+    }
+
+    return lines;
+  }
+}
+
+function processGroup(layer, boundingLayer, offsetX, offsetY) {
+  if(!layer.isVisible()) return [];
+
+  var lines = [];
+  lines.push("func {{0}}(rect: CGRect){".format(safeName(layer)));
+  lines.push("\tlet ctx = UIGraphicsGetCurrentContext()");
+  lines.push("\tlet width = rect.width");
+  lines.push("\tlet height = rect.height");
+
+  lines.push("");
+  lines.push("\tvar pstyleRightAlign = NSMutableParagraphStyle()");
+  lines.push("\tpstyleRightAlign.alignment = NSTextAlignment.Right");
+  lines.push("");
+
+  lines.push("\tvar pstyleLeftAlign = NSMutableParagraphStyle()");
+  lines.push("\tpstyleLeftAlign.alignment = NSTextAlignment.Left");
+  lines.push("");
+
+  lines.push("\tvar pstyleCenterAlign = NSMutableParagraphStyle()");
+  lines.push("\tpstyleCenterAlign.alignment = NSTextAlignment.Center");
+  lines.push("");
+
+  var groupFunctions = [];
+
+  forEach(layer.layers(), function(item){if(item.isVisible()) {
+    if(!item.isVisible()) return;
+
+    if(isShape(item)) {
+      lines.push(processShape(item, boundingLayer, offsetX, offsetY));
+    } else if(isGroup(item)) {
+      lines.push("\t{{0}}(rect)".format(safeName(item)));
+      groupFunctions.push("");
+      groupFunctions = groupFunctions.concat(processGroup(item, layer, offsetX + item.frame().x(), offsetY + item.frame().y()));
+    } else if(isText(item)) {
+      lines.push(processText(item, boundingLayer, offsetX, offsetY));
+    }
+  }})
+
+  lines.push("}");
+  lines = lines.concat(groupFunctions);
+  return lines;
+  
+}
+
+function processText(layer, boundingLayer, offsetX, offsetY) {
+  var lines = [];
+  
+  var x = offsetX + layer.frame().x();
+  var y = offsetY + layer.frame().y();
+  var layerWidth = layer.frame().width();
+  var layerHeight = layer.frame().height();
+
+  var width = boundingLayer.frame().width();
+  var height = boundingLayer.frame().height();
+
+  var cgRect = "CGRect(x:{{0}}*(width/{{4}}), y:{{1}}*(height/{{5}}) + {{3}}*(1-(height/{{5}}))/2, width:{{2}}*(width/{{4}}), height:{{3}}*(height/{{5}}))".format(round(x),round(y),round(layerWidth),round(layerHeight),round(width),round(height));
+
+  lines.push("CGContextSaveGState(ctx)");
+  lines.push("\"{{0}}\".drawInRect({{1}}, withAttributes:{{2}})".format(layer.name() ,cgRect, processAttributes(layer,boundingLayer)));
+  lines.push("CGContextRestoreGState(ctx)");
+
+  return lines;
+}
+
+function processStroke(layer, boundingLayer) {
+  var lines = [];
+
+  forEach(layer.style().borders(), function(item){
+    if(item.isEnabled() && item.fillType() == 0 && item.position() == 0){
+      var c = item.color();
+
+      lines.push("CGContextSetStrokeColorWithColor(ctx, UIColor(hue:{{0}}, saturation:{{1}} , brightness:{{2}} , alpha:{{3}}).CGColor)".format(round(c.hue()), round(c.saturation()), round(c.brightness()), round(c.alpha())));
+      lines.push("CGContextSetLineWidth(ctx, {{0}}*min(width/{{1}}, height/{{2}}))".format(round(item.thickness()), round(boundingLayer.frame().width()), round(boundingLayer.frame().height())));
+    }
+  })
+  return lines;
+}
+
+function processFill(layer, boundingLayer) {
+  var lines = [];
+
+  forEach(layer.style().fills(), function(item){
+    if(item.isEnabled() && item.fillType() == 0){
+      var c = item.color();
+      lines.push("CGContextSetFillColorWithColor(ctx, UIColor(hue:{{0}}, saturation:{{1}} , brightness:{{2}} , alpha:{{3}}).CGColor)".format(round(c.hue()), round(c.saturation()), round(c.brightness()), round(c.alpha())));
+      return false;
+    }
+  });
+
+  return lines;
+}
+
+function processAttributes(layer, boundingLayer) {
+  var color = layer.textColor();
+  var lines = [];
+
+  lines.push("NSFontAttributeName: UIFont(name: \"{{0}}\", size: {{1}}*(width/{{2}}))!".format(layer.fontPostscriptName(), round(layer.fontSize()), round(boundingLayer.frame().width())));
+  lines.push("NSForegroundColorAttributeName: UIColor(hue: {{0}}, saturation: {{1}}, brightness: {{2}}, alpha: {{3}})".format(round(color.hue()), round(color.saturation()), round(color.brightness()), round(color.alpha())));
+
+  if(layer.textAlignment() == 0) lines.push("NSParagraphStyleAttributeName: pstyleLeftAlign");
+  else if(layer.textAlignment() == 1) lines.push("NSParagraphStyleAttributeName: pstyleRightAlign");
+  else if(layer.textAlignment() == 2) lines.push("NSParagraphStyleAttributeName: pstyleCenterAlign");
+
+  
+  return "[{{0}}]".format(lines.join(","));
+}

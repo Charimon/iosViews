@@ -45,13 +45,15 @@ function drawLayerGroup(layer, boundingFrame, offsetX, offsetY) {
 
     if(!item.isVisible()) continue
 
-    if(item.class() == MSLayerGroup)) {
+    if(item.class() == MSLayerGroup) {
       groupFunctions += drawLayerGroup(item, boundingFrame, oX, oY)
       str += "\n " + safeName(item) + "(rect)\n"
-    } else if(item.class() == MSShapeGroup)) {
+    }
+    else if(item.class() == MSShapeGroup) {
       str += "\n//" + safeName(item) + "\n"
       str += drawShapeGroup(item, boundingFrame, offsetX, offsetY)
-    } else if(item.class() == MSTextLayer) {
+    }
+    else if(item.class() == MSTextLayer) {
       str += drawTextLayer(item, boundingFrame, offsetX, offsetY)
     }
   }
