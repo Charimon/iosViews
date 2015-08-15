@@ -1,0 +1,170 @@
+@import "library.cocoascript";
+
+var onRun = function(context) {
+  var loop = context.selection.objectEnumerator();
+
+  while(item = loop.nextObject() ){
+    Lib.paste(Swift.flattenArray(processSelected(item)).toString());
+  }
+};
+
+var processSelected = function(selected) {
+  if(Lib.isArtboard(selected)) return processArtboard(selected)
+  else return processArtboard(selected.parentArtboard())
+}
+
+var processArtboard = function(artboard) {
+  if(!Lib.isArtboard(artboard)) return [];
+
+  var layerNames = []
+  var swiftCode = processGroup(artboard, artboard.frame(), Swift.safeName(artboard.name()), layerNames)
+
+  var nameCode = []
+  for(var i=0; i< layerNames.length; i++) {
+    var name = layerNames[i]
+    var namePath = name + "_path"
+    nameCode = nameCode.concat([name + ".frame = bounds", name + ".path = " + namePath + "("+ name +".frame)"])
+  }
+
+  swiftCode = swiftCode.concat(Swift.wrapInFrameMethodNoReturn(nameCode, Swift.safeName(artboard.name())))
+
+  return swiftCode
+}
+
+//consider an artboard to be a group
+var processGroup = function(group, artboardFrame, artboardName, layerNames) {
+  if(!(Lib.isGroup(group) || Lib.isArtboard(group))) return [];
+
+  var swiftCode = []
+  var layers = group.layers();
+
+  if(artboardFrame == null) artboardFrame = group.frame()
+  if(artboardName == null) {
+    artboardName = Swift.safeName(group.name())
+  }
+
+  for(var i = 0; i < layers.count(); i++){
+    var thing = [layers objectAtIndex:i]
+    if(!thing.isVisible()) continue;
+
+    if(Lib.isShape(thing)) {
+      swiftCode = swiftCode.concat(processShape(thing, artboardFrame, artboardName) )
+      layerNames.push(Swift.safeName(thing.name()))
+    }
+    else if(Lib.isGroup(thing)) { swiftCode = swiftCode.concat(processGroup(thing, artboardFrame, artboardName, layerNames) ) }
+  }
+  return swiftCode
+}
+
+var processShape = function(thing, artboardFrame) {
+  var swiftCode = []
+
+  var shapeName = Swift.safeName(thing.name())
+  var shapePathName = shapeName+"_path"
+
+  var layerArray = ["let l = CAShapeLayer()"]
+  layerArray = layerArray.concat(extractStroke(thing.style()))
+  layerArray = layerArray.concat(extractFills(thing.style()))
+  layerArray.push("self.layer.addSublayer(l)")
+  layerArray.push("return l")
+
+  swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName, layerArray))
+  swiftCode = swiftCode.concat(Swift.wrapInFrameMethod(processShapePath(thing, artboardFrame), shapePathName ) )
+
+  return swiftCode
+}
+
+var extractFills = function(style) {
+  var array = []
+  var fills = style.fills().array()
+  for(var i = fills.count() - 1; i >= 0; i--) {
+    var color = fills[i].color();
+    if(fills[i].isEnabled())) {
+      array.push("l.fillColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+    }
+  }
+  return array
+}
+
+var extractStroke = function(style) {
+  var array = []
+
+  var borders = style.borders().array()
+  for(var i = borders.count() - 1; i >= 0; i--) {
+    if(borders[i].isEnabled() && borders[i].position() == 0) {
+      var color = borders[i].color();
+      array.push("l.lineWidth = " + borders[i].thickness())
+      array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+    }
+  }
+  return array
+}
+
+var processShapePath = function(anything, boundsRect) {
+  if(!Lib.isShape(anything)) { return null; }
+
+  //lets assume there is only 1 item in shape
+  var layer = anything.layers().objectAtIndex(0)
+
+  var path = layer.path()
+  var pointsCount = path.numberOfPoints()
+  var swiftCode = ["let path = UIBezierPath()"]
+
+  for(var i = 0; i < pointsCount; i++) { addPoint(swiftCode, layer, path, i, i == 0, boundsRect); }
+  if(path.isClosed()) { addPoint(swiftCode, layer, path, 0, false, boundsRect); }
+  swiftCode.push("return path.CGPath");
+
+  return swiftCode
+}
+
+var addPoint = function(acc, layer, path, index, isFirst, boundsRect) {
+  var offsetX = CGRectGetMinX(layer.frameInArtboard())
+  var offsetY = CGRectGetMinY(layer.frameInArtboard())
+  var offsetWidth = boundsRect.width()
+  var offsetHeight = boundsRect.height()
+
+  var pathPoint = path.pointAtIndex(index);
+  var abs_point = layer.absolutePoint(pathPoint.point())
+
+  var abs_pointTo = null
+  if(pathPoint.hasCurveTo()) { abs_pointTo = layer.absolutePoint(pathPoint.curveTo()); }
+
+  var prev_abs_pointFrom = null
+  if(index >= 0 && !isFirst) {
+    var prevPoint = path.pointAtIndex( (index-1 + path.numberOfPoints()) % path.numberOfPoints() );
+    if(prevPoint.hasCurveFrom()) { prev_abs_pointFrom = layer.absolutePoint(prevPoint.curveFrom()); }
+  }
+
+  if(index == 0 && isFirst) { acc.push("path.moveToPoint("+relPointOffset(abs_point, offsetX, offsetY, offsetWidth, offsetHeight)+")") }
+  else if(prev_abs_pointFrom && abs_pointTo) {
+    acc.push("path.addCurveToPoint("+relPointOffset(abs_point, offsetX, offsetY, offsetWidth, offsetHeight)+", controlPoint1: "+relPointOffset(prev_abs_pointFrom, offsetX, offsetY, offsetWidth, offsetHeight)+", controlPoint2:"+relPointOffset(abs_pointTo, offsetX, offsetY, offsetWidth, offsetHeight)+")")
+  } else if(prev_abs_pointFrom || abs_pointTo) {
+    var controlPoint = prev_abs_pointFrom || abs_pointTo
+    acc.push("path.addQuadCurveToPoint("+relPointOffset(abs_point, offsetX, offsetY, offsetWidth, offsetHeight)+", controlPoint: "+relPointOffset(controlPoint, offsetX, offsetY, offsetWidth, offsetHeight)+")")
+  } 
+  else {
+    acc.push("path.addLineToPoint("+relPointOffset(abs_point, offsetX, offsetY, offsetWidth, offsetHeight)+")")
+  }
+}
+
+var relPointOffset = function(point, offsetX, offsetY, width, height) {
+  var x = Lib.toFixed(parseFloat(point.x) + parseFloat(offsetX), 2 )
+  var y = Lib.toFixed(parseFloat(point.y) + parseFloat(offsetY), 2 )
+  var widthString = "*bounds.width/" + Lib.toFixed(width, 2)
+  var heightString = "*bounds.height/" + Lib.toFixed(height, 2)
+  return "CGPoint(x: " + x + widthString + " , y: " + y + heightString + ")"
+}
+
+var relRect = function(rect, frame) {
+  var x = rect.x()
+  var y = rect.y()
+  var width = rect.width()
+  var height = rect.height()
+  var frame_width = frame.width()
+  var frame_height = frame.height()
+  
+  return "CGRect(x: " + Lib.toFixed(x, 2) +  " * bounds.width/"+Lib.toFixed(frame_width, 2) +
+              ", y: " + Lib.toFixed(y, 2) + " * bounds.height/"+Lib.toFixed(frame_height, 2) +
+              ", width: " + Lib.toFixed(width, 2) + " * bounds.width/"+Lib.toFixed(frame_width, 2) +
+              ", height: " + Lib.toFixed(height, 2) + " * bounds.height/"+Lib.toFixed(frame_height, 2)+")"
+}

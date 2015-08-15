@@ -1,0 +1,23 @@
+{
+  "author" : "Charimon",
+  "commands" : [
+    {
+      "script" : "script.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "ctrl shift p",
+      "name" : "iOS Path Exporter",
+      "identifier" : "pathExporter"
+    },
+  ],
+  "menu": {
+    "isRoot": true,
+    "items": [
+      "pathExporter",
+    ],
+  },
+  "identifier" : "com.charimon.sketch.pathExporter",
+  "version" : "1",
+  "description" : "A way to export ios Shapes to swift Path code",
+  "authorEmail" : "",
+  "name" : "iOS Path Exporter"
+}

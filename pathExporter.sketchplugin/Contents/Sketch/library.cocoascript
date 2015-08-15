@@ -1,0 +1,66 @@
+String.prototype.repeat = function( num ) {
+  return new Array( num + 1 ).join( this );
+}
+String.prototype.replaceAll = function(search, replace){
+  if(!search || !replace){return this;}
+  return this.replace(new RegExp('[' + search + ']', 'g'), replace);
+};
+
+var Lib = {
+  isArray: function(anything) {
+    if( Object.prototype.toString.call( anything ) === '[object Array]' ) {
+      return true
+    }
+    return false
+  },
+  //rectangle, circle, vector, etc
+  isShape: function(item) {return [item isMemberOfClass:[MSShapeGroup class]]; },
+
+  //normal sketch group
+  isGroup: function(item) {return [item isMemberOfClass:[MSLayerGroup class]]; },
+
+  isArtboard: function(item) {return [item isMemberOfClass:[MSArtboardGroup class]]; },
+
+  paste: function(value) {
+    var pasteBoard = [NSPasteboard generalPasteboard];
+    [pasteBoard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pasteBoard setString:value forType: NSStringPboardType];
+  },
+
+  toFixed: function(number, precision) {
+    var power = Math.pow(10, precision || 0);
+    return String(Math.round(number * power)/power);
+  }
+}
+
+var Swift = {
+  safeName: function(name) { return name.replaceAll(" ", "_") },
+
+  wrapInFrameMethod: function(array, methodName) {
+    return ["func " + methodName + "(bounds: CGRect) -> CGPath {", array, "}"]
+  },
+
+  wrapInFrameMethodNoReturn: function(array, methodName) {
+    return ["func " + methodName + "(bounds: CGRect) {", array, "}"]
+  },
+
+  wrapInLazyVariable: function(name, array) {
+    return ["lazy var "+name+": CAShapeLayer = {", array, "}()"]
+  },
+
+  _flattenArray: function(acc, value, index) {
+    if(Lib.isArray(value)) {
+      for(var i=0; i<value.length; i++) {
+        Swift._flattenArray(acc, value[i], index + 1)
+      }
+    } else {
+      acc.push("\t".repeat(index) + value)
+    }
+  },
+
+  flattenArray: function(array) {
+    var flatArray = [];
+    Swift._flattenArray(flatArray, array, -1)
+    return flatArray.join("\n");
+  }
+}
