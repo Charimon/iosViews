@@ -105,8 +105,8 @@ func moo(bounds: CGRect) {
 #####ios
 after adding the following to some UIView
 ```swift
-override func layoutSubviews(rect: CGRect) {
-    moo(rect)
+override func layoutSubviews() {
+  moo(self.bounds)
 }
 ```
 you should see
