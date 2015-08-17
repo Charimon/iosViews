@@ -90,10 +90,17 @@ var extractStroke = function(style) {
   var array = []
 
   var borders = style.borders().array()
+  var borderOptions = style.borderOptions()
+  var lineJoin = borderOptions.lineJoinStyle());
+  var lineCap = borderOptions.lineCapStyle();
+  var dashPattern = borderOptions.dashPattern().componentsJoinedByString(",")
   for(var i = borders.count() - 1; i >= 0; i--) {
     if(borders[i].isEnabled() && borders[i].position() == 0) {
       var color = borders[i].color();
       array.push("l.lineWidth = " + borders[i].thickness())
+      array.push("l.lineDashPattern = [" + dashPattern + "]")
+      array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineCap])
+      array.push("l.lineCap = " + ["kCALineCapButt", "kCALineCapRound", "kCALineCapSquare"][lineCap])
       array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
     }
   }
