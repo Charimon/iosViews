@@ -44,8 +44,9 @@ var Swift = {
     return ["func " + methodName + "(bounds: CGRect) {", array, "}"]
   },
 
-  wrapInLazyVariable: function(name, array) {
-    return ["lazy var "+name+": CAShapeLayer = {", array, "}()"]
+  wrapInLazyVariable: function(name, array, type) {
+    if(type == null) type = "CAShapeLayer"
+    return ["lazy var "+name+": " + type + " = {", array, "}()"]
   },
 
   _flattenArray: function(acc, value, index) {

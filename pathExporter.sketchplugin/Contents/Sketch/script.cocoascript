@@ -16,14 +16,23 @@ var processSelected = function(selected) {
 var processArtboard = function(artboard) {
   if(!Lib.isArtboard(artboard)) return [];
 
-  var layerNames = []
-  var swiftCode = processGroup(artboard, artboard.frame(), Swift.safeName(artboard.name()), layerNames)
+  var layers = []
+  var swiftCode = processGroup(artboard, artboard.frame(), Swift.safeName(artboard.name()), layers)
 
   var nameCode = []
-  for(var i=0; i< layerNames.length; i++) {
-    var name = layerNames[i]
+  for(var i=0; i< layers.length; i++) {
+    var name = Swift.safeName(layers[i].name())    
+    var fill = getFill(layers[i])
+
     var namePath = name + "_path"
-    nameCode = nameCode.concat([name + ".frame = bounds", name + ".path = " + namePath + "("+ name +".frame)"])
+    nameCode.push(name + ".frame = bounds")
+    nameCode.push(name + ".path = " + namePath + "("+ name +".frame)")
+
+    if(fill != null && fill.fillType() == 1 && fill.gradient().gradientType() == 0) {
+      nameCode.push(name + "_gradient.frame = bounds")
+      nameCode.push("(" + name + "_gradient.mask as? CAShapeLayer)?.path = " + namePath + "(" + name + ".frame)")
+    }
+
   }
 
   swiftCode = swiftCode.concat(Swift.wrapInFrameMethodNoReturn(nameCode, Swift.safeName(artboard.name())))
@@ -32,7 +41,7 @@ var processArtboard = function(artboard) {
 }
 
 //consider an artboard to be a group
-var processGroup = function(group, artboardFrame, artboardName, layerNames) {
+var processGroup = function(group, artboardFrame, artboardName, layersObjects) {
   if(!(Lib.isGroup(group) || Lib.isArtboard(group))) return [];
 
   var swiftCode = []
@@ -49,9 +58,9 @@ var processGroup = function(group, artboardFrame, artboardName, layerNames) {
 
     if(Lib.isShape(thing)) {
       swiftCode = swiftCode.concat(processShape(thing, artboardFrame, artboardName) )
-      layerNames.push(Swift.safeName(thing.name()))
+      layersObjects.push(thing)
     }
-    else if(Lib.isGroup(thing)) { swiftCode = swiftCode.concat(processGroup(thing, artboardFrame, artboardName, layerNames) ) }
+    else if(Lib.isGroup(thing)) { swiftCode = swiftCode.concat(processGroup(thing, artboardFrame, artboardName, layers) ) }
   }
   return swiftCode
 }
@@ -62,28 +71,70 @@ var processShape = function(thing, artboardFrame) {
   var shapeName = Swift.safeName(thing.name())
   var shapePathName = shapeName+"_path"
 
+  var fill = getFill(thing)
+
   var layerArray = ["let l = CAShapeLayer()"]
   layerArray = layerArray.concat(extractStroke(thing.style()))
-  layerArray = layerArray.concat(extractFills(thing.style()))
-  layerArray.push("self.layer.addSublayer(l)")
-  layerArray.push("return l")
-
+  if(fill.fillType() == 0) layerArray = layerArray.concat(extractFill(fill))
+  layerArray = layerArray.concat(["self.layer.addSublayer(l)", "return l"])
   swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName, layerArray))
+
+  if(fill.fillType() == 1) {
+    extractFill(fill)
+    layerArray = ["let l = CAGradientLayer()"]
+    layerArray = layerArray.concat(extractFill(fill))
+    layerArray = layerArray.concat(["l.mask = CAShapeLayer()",
+                  "self." + shapeName + ".addSublayer(l)",
+                  "return l"])
+    swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName + "_gradient", layerArray, CAGradientLayer))
+  }
+
   swiftCode = swiftCode.concat(Swift.wrapInFrameMethod(processShapePath(thing, artboardFrame), shapePathName ) )
 
   return swiftCode
 }
 
-var extractFills = function(style) {
-  var array = []
+var getFill = function(thing) {
+  var style = thing.style();
   var fills = style.fills().array()
+
   for(var i = fills.count() - 1; i >= 0; i--) {
-    var color = fills[i].color();
-    if(fills[i].isEnabled())) {
-      array.push("l.fillColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+    if(fills[i].isEnabled() && [0, 1].indexOf(fills[i].fillType()) >= 0 ) {
+      return fills[i]
     }
   }
-  return array
+
+  return null;
+}
+
+//MSStyleFill
+var extractFill = function(styleFill) {
+  if(styleFill == null) return [];
+
+  var color = styleFill.color();
+  var fillType = styleFill.fillType();
+  if(fillType == 0) {
+    return ["l.fillColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor"]
+  } else if(fillType == 1 && styleFill.gradient().gradientType() == 0) {
+    var gradientStops = styleFill.gradient().stops()
+    var colorsArr = []
+    var locationsArr = []
+    for(var i=0; i< gradientStops.length(); i ++) {
+      var stop = gradientStops.objectAtIndex(i)
+      var color = stop.color()
+      locationsArr.push("NSNumber(float: " + Lib.toFixed(stop.position(), 2) + ")")
+      colorsArr.push("UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+    }
+
+    var from = styleFill.gradient().from()
+    var to = styleFill.gradient().to()
+
+    return ["l.colors = ["+colorsArr.toString()+"]",
+            "l.locations = ["+locationsArr.toString()+"]",
+            "l.startPoint = CGPointMake(" + Lib.toFixed(from.x, 2) + ", " + Lib.toFixed(from.y, 2) + ")",
+            "l.endPoint = CGPointMake(" + Lib.toFixed(to.x, 2) + ", " + Lib.toFixed(to.y, 2) + ")"]
+  }
+  return []
 }
 
 var extractStroke = function(style) {

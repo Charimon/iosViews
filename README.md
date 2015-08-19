@@ -36,7 +36,8 @@ When you run the plugin it puts the generated code into your artboard, so if you
 1. radius on object (set the radius on individual path instead of object... click enter > highlight points > set radius)
 1. opacity on object (set your opacity on the color directly, and it will work)
 1. transformation on the object (flatten them all, if you have a rotated group, ungroup it then flatten it, that way your rotation will be preserved)
-1. any color that isn't a solid (gradients, fills don't work)
+1. for fills only solid and linear gradients work, others don't
+1. for stroke, only solid color works, others don't
 1. more than 1 border or fill (only the last valid border and last valid fill are set, valid = center borders with solid color)
 1. inside, outside borders don't work and are ignored (only center border works)
 1. blending (will always be treated as "normal")
