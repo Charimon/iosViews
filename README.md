@@ -45,9 +45,8 @@ When you run the plugin it puts the generated code into your artboard, so if you
 1. character spacing, line height, paragraph spacing are ignored
 1. justified alignment is ignored
 1. text layers are ignored
-1. typeface might be iffy (I've only tested Helvetica Neue, and that's what ios defaults to if it can't find your typeface)
 1. even/odd setting on fill is ignored (it uses whatever ios uses, I don't know if it's even/odd or non zero by default)
-1. all border settings (ends, joints, start arrow, end arrow, dash, gap) are ignored
+1. border arrow settings
 
 ####TODO:
 - fix a lot of the things that don't work
