@@ -75,11 +75,11 @@ var processShape = function(thing, artboardFrame) {
 
   var layerArray = ["let l = CAShapeLayer()"]
   layerArray = layerArray.concat(extractStroke(thing.style()))
-  if(fill.fillType() == 0) layerArray = layerArray.concat(extractFill(fill))
+  if(fill != null && fill.fillType() == 0) layerArray = layerArray.concat(extractFill(fill))
   layerArray = layerArray.concat(["self.layer.addSublayer(l)", "return l"])
   swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName, layerArray))
 
-  if(fill.fillType() == 1) {
+  if(fill != null && fill.fillType() == 1) {
     extractFill(fill)
     layerArray = ["let l = CAGradientLayer()"]
     layerArray = layerArray.concat(extractFill(fill))
