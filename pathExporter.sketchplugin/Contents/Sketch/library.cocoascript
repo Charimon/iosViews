@@ -37,16 +37,16 @@ var Swift = {
   safeName: function(name) { return name.replaceAll(" ", "_") },
 
   wrapInFrameMethod: function(array, methodName) {
-    return ["func " + methodName + "(bounds: CGRect) -> CGPath {", array, "}"]
+    return ["\tfunc " + methodName + "(bounds: CGRect) -> CGPath {", array, "\t}\n"]
   },
 
   wrapInFrameMethodNoReturn: function(array, methodName) {
-    return ["func " + methodName + "(bounds: CGRect) {", array, "}"]
+    return ["\tfunc " + methodName + "(bounds: CGRect) {", array, "\t}"]
   },
 
   wrapInLazyVariable: function(name, array, type) {
     if(type == null) type = "CAShapeLayer"
-    return ["lazy var "+name+": " + type + " = {", array, "}()"]
+    return ["\tlazy var "+name+": " + type + " = {", array, "\t}()"]
   },
 
   _flattenArray: function(acc, value, index) {
@@ -55,7 +55,7 @@ var Swift = {
         Swift._flattenArray(acc, value[i], index + 1)
       }
     } else {
-      acc.push("\t".repeat(index) + value)
+      acc.push("\t\t".repeat(index) + value)
     }
   },
 
