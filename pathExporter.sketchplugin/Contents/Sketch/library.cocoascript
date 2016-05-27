@@ -25,7 +25,7 @@ var Lib = {
   //normal sketch group
   isGroup: function(item) {return [item isMemberOfClass:[MSLayerGroup class]]; },
 
-  isArtboard: function(item) {return [item isMemberOfClass:[MSArtboardGroup class]]; },
+  isArtboard: function(item) {return [item isMemberOfClass:[MSArtboardGroup class]] || [item isMemberOfClass:[MSLayerGroup class]]; },
 
   paste: function(value) {
     var pasteBoard = [NSPasteboard generalPasteboard];

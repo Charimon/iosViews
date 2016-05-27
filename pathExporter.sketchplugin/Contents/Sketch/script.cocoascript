@@ -112,7 +112,11 @@ var processShape = function(thing, artboardFrame) {
 
   var layerArray = ["let l = CAShapeLayer()"]
   layerArray = layerArray.concat(extractStroke(thing.style()))
-  if(fill != null && fill.fillType() == 0) layerArray = layerArray.concat(extractFill(fill))
+  if(fill != null) {
+    if(fill.fillType() == 0) layerArray = layerArray.concat(extractFill(fill))
+  } else {
+    layerArray.push("l.fillColor = nil")
+  }
   layerArray = layerArray.concat(["self.layer.addSublayer(l)", "return l"])
   
   swiftCode.push("\t// " + shapeName + " shape")
@@ -152,7 +156,7 @@ var getFill = function(thing) {
 
 //MSStyleFill
 var extractFill = function(styleFill) {
-  if(styleFill == null) return [];
+  if(styleFill == null) return ["l.fillColor = nil"];
 
   var color = styleFill.color();
   var fillType = styleFill.fillType();
@@ -177,28 +181,34 @@ var extractFill = function(styleFill) {
             "l.startPoint = CGPointMake(" + Lib.toFixed(from.x, 2) + ", " + Lib.toFixed(from.y, 2) + ")",
             "l.endPoint = CGPointMake(" + Lib.toFixed(to.x, 2) + ", " + Lib.toFixed(to.y, 2) + ")"]
   } else if(fillType == 1) {
-	log("Unsupported gradient type: " + styleFill.gradient().gradientType());
+    log("Unsupported gradient type: " + styleFill.gradient().gradientType());
   }
-  return []
+  return ["l.fillColor = nil"]
 }
 
 var extractStroke = function(style) {
   var array = []
 
   var borders = style.borders().array()
-  var borderOptions = style.borderOptions()
-  var lineJoin = borderOptions.lineJoinStyle();
-  var lineCap = borderOptions.lineCapStyle();
-  var dashPattern = borderOptions.dashPattern().componentsJoinedByString(",")
-  for(var i = borders.count() - 1; i >= 0; i--) {
-    if(borders[i].isEnabled() && borders[i].position() == 0) {
-      var color = borders[i].color();
-      array.push("l.lineWidth = " + borders[i].thickness())
-      array.push("l.lineDashPattern = [" + dashPattern + "]")
-      array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineJoin])
-      array.push("l.lineCap = " + ["kCALineCapButt", "kCALineCapRound", "kCALineCapSquare"][lineCap])
-      array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+
+  if (borders != null && borders.count() > 0) {
+    var borderOptions = style.borderOptions()
+    var lineJoin = borderOptions.lineJoinStyle();
+    var lineCap = borderOptions.lineCapStyle();
+    var dashPattern = borderOptions.dashPattern().componentsJoinedByString(",")
+    
+    for(var i = borders.count() - 1; i >= 0; i--) {
+      if(borders[i].isEnabled() && borders[i].position() == 0) {
+        var color = borders[i].color();
+        array.push("l.lineWidth = " + borders[i].thickness())
+        array.push("l.lineDashPattern = [" + dashPattern + "]")
+        array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineJoin])
+        array.push("l.lineCap = " + ["kCALineCapButt", "kCALineCapRound", "kCALineCapSquare"][lineCap])
+        array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
+      }
     }
+  } else {
+    array.push("l.strokeColor = nil")
   }
   return array
 }
