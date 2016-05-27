@@ -7,6 +7,12 @@ String.prototype.replaceAll = function(search, replace){
 };
 
 var Lib = {
+  alert: function(message) {
+    var app = [NSApplication sharedApplication];
+
+    [app displayDialog:message];
+  },
+  
   isArray: function(anything) {
     if( Object.prototype.toString.call( anything ) === '[object Array]' ) {
       return true
@@ -26,7 +32,25 @@ var Lib = {
     [pasteBoard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     [pasteBoard setString:value forType: NSStringPboardType];
   },
-
+  
+  save: function(name, value) {
+    var panel = [NSSavePanel savePanel];
+    
+    [panel setMessage:"Where do you want to place the class?"];
+    [panel setRequiredFileType: "swift"];
+    [panel setCanCreateDirectories: true];
+    if (name != null) {
+	  [panel setNameFieldStringValue: name];
+	}
+	
+    if ([panel runModal] == NSOKButton) {
+      var filePath = [panel filename];
+      var stringValue = [NSString stringWithFormat: @"%@", value];
+      
+      [stringValue writeToFile: filePath atomically: true encoding: NSUTF8StringEncoding error: null];
+    }
+  },
+  
   toFixed: function(number, precision) {
     var power = Math.pow(10, precision || 0);
     return String(Math.round(number * power)/power);

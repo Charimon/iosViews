@@ -1,10 +1,31 @@
 @import "library.cocoascript";
 
 var onRun = function(context) {
+  if (context.selection == null || context.selection.count() == 0) {
+    Lib.alert("Select an object to export its data to the clipboard!");
+    return;
+  }
+  
   var loop = context.selection.objectEnumerator();
 
   while(item = loop.nextObject() ){
     Lib.paste(Swift.flattenArray(processSelected(item)).toString());
+  }
+};
+
+var onSave = function(context) {
+  if (context.selection == null || context.selection.count() == 0) {
+    Lib.alert("Select an object to save the class on disk!");
+    return;
+  }
+  
+  var loop = context.selection.objectEnumerator();
+
+  while(item = loop.nextObject() ){
+    var artboard = Lib.isArtboard(item) ? item : item.parentArtboard();
+    var boardName = Swift.safeName(artboard.name());
+    
+    Lib.save(boardName + "View", Swift.flattenArray(processSelected(item)).toString())
   }
 };
 
@@ -97,14 +118,18 @@ var processShape = function(thing, artboardFrame) {
   swiftCode.push("\t// " + shapeName + " shape")
   swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName, layerArray))
 
-  if(fill != null && fill.fillType() == 1) {
-    extractFill(fill)
-    layerArray = ["let l = CAGradientLayer()"]
-    layerArray = layerArray.concat(extractFill(fill))
-    layerArray = layerArray.concat(["l.mask = CAShapeLayer()",
-                  "self." + shapeName + ".addSublayer(l)",
-                  "return l"])
-    swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName + "_gradient", layerArray, CAGradientLayer))
+  if(fill != null) {
+    if (fill.fillType() == 1) {
+	  extractFill(fill)
+	  layerArray = ["let l = CAGradientLayer()"]
+	  layerArray = layerArray.concat(extractFill(fill))
+	  layerArray = layerArray.concat(["l.mask = CAShapeLayer()",
+	                                "self." + shapeName + ".addSublayer(l)",
+	                                "return l"])
+	  swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName + "_gradient", layerArray, CAGradientLayer))
+	} else if (fill.fillType() > 1) {
+	  log("Unsupported fill type: " + fill.fillType());
+	}
   }
 
   swiftCode = swiftCode.concat(Swift.wrapInFrameMethod(processShapePath(thing, artboardFrame), shapePathName ) )
@@ -151,6 +176,8 @@ var extractFill = function(styleFill) {
             "l.locations = ["+locationsArr.toString()+"]",
             "l.startPoint = CGPointMake(" + Lib.toFixed(from.x, 2) + ", " + Lib.toFixed(from.y, 2) + ")",
             "l.endPoint = CGPointMake(" + Lib.toFixed(to.x, 2) + ", " + Lib.toFixed(to.y, 2) + ")"]
+  } else if(fillType == 1) {
+	log("Unsupported gradient type: " + styleFill.gradient().gradientType());
   }
   return []
 }
