@@ -7,7 +7,7 @@ var onRun = function(context) {
   }
   
   var loop = context.selection.objectEnumerator();
-
+  
   while(item = loop.nextObject() ){
     Lib.paste(Swift.flattenArray(processSelected(item)).toString());
   }
@@ -187,7 +187,7 @@ var extractStroke = function(style) {
 
   var borders = style.borders().array()
   var borderOptions = style.borderOptions()
-  var lineJoin = borderOptions.lineJoinStyle());
+  var lineJoin = borderOptions.lineJoinStyle();
   var lineCap = borderOptions.lineCapStyle();
   var dashPattern = borderOptions.dashPattern().componentsJoinedByString(",")
   for(var i = borders.count() - 1; i >= 0; i--) {
@@ -195,7 +195,7 @@ var extractStroke = function(style) {
       var color = borders[i].color();
       array.push("l.lineWidth = " + borders[i].thickness())
       array.push("l.lineDashPattern = [" + dashPattern + "]")
-      array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineCap])
+      array.push("l.lineJoin = " + ["kCALineJoinMiter", "kCALineJoinRound", "kCALineJoinBevel"][lineJoin])
       array.push("l.lineCap = " + ["kCALineCapButt", "kCALineCapRound", "kCALineCapSquare"][lineCap])
       array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
     }
@@ -206,15 +206,20 @@ var extractStroke = function(style) {
 var processShapePath = function(anything, boundsRect) {
   if(!Lib.isShape(anything)) { return null; }
 
-  //lets assume there is only 1 item in shape
-  var layer = anything.layers().objectAtIndex(0)
-
-  var path = layer.path()
-  var pointsCount = path.numberOfPoints()
   var swiftCode = ["let path = UIBezierPath()", "let wdtRatio = bounds.width/" + boundsRect.width(), "let hgtRatio = bounds.height/" + boundsRect.height()]
+  
+  for (var j = 0; j < anything.layers().count(); j++) {
+    var layer = anything.layers().objectAtIndex(j)
 
-  for(var i = 0; i < pointsCount; i++) { addPoint(swiftCode, layer, path, i, i == 0); }
-  if(path.isClosed()) { addPoint(swiftCode, layer, path, 0, false); }
+    var path = layer.path()
+    var pointsCount = path.numberOfPoints()
+
+    for(var i = 0; i < pointsCount; i++) { addPoint(swiftCode, layer, path, i, i == 0); }
+    if(path.isClosed()) {
+      addPoint(swiftCode, layer, path, 0, false);
+      swiftCode.push("path.closePath()");
+    }
+  }
   swiftCode.push("return path.CGPath");
 
   return swiftCode
