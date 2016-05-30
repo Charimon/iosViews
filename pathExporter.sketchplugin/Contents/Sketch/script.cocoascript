@@ -156,6 +156,7 @@ var getFill = function(thing) {
 
 //MSStyleFill
 var extractFill = function(styleFill) {
+  // Default fillColor is opaque black, so we've to specify an empty fill explicitly
   if(styleFill == null) return ["l.fillColor = nil"];
 
   var color = styleFill.color();
@@ -187,6 +188,7 @@ var extractFill = function(styleFill) {
 }
 
 var extractStroke = function(style) {
+  // Default stroke is nil, so no need to specify anything
   var array = []
 
   var borders = style.borders().array()
@@ -207,8 +209,6 @@ var extractStroke = function(style) {
         array.push("l.strokeColor = UIColor(hue: " + Lib.toFixed(color.hue(), 2) +", saturation: " + Lib.toFixed(color.saturation(), 2) + ", brightness: " + Lib.toFixed(color.brightness(), 2) + ", alpha: " + Lib.toFixed(color.alpha(), 2) + ").CGColor")
       }
     }
-  } else {
-    array.push("l.strokeColor = nil")
   }
   return array
 }
