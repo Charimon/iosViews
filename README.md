@@ -52,7 +52,6 @@ When you run the plugin it puts the generated code into your artboard, so if you
 - fix a lot of the things that don't work
 - settle on a good shortcut
 - add this to sketch toolbox
-- make it export to a file, rather than cliboard (which is currently makes the pasting teeeerribly slow if you're pasting into xcode)
 
 ####Example
 #####Sketch File

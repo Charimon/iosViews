@@ -7,6 +7,12 @@ String.prototype.replaceAll = function(search, replace){
 };
 
 var Lib = {
+  alert: function(message) {
+    var app = [NSApplication sharedApplication];
+
+    [app displayDialog:message];
+  },
+  
   isArray: function(anything) {
     if( Object.prototype.toString.call( anything ) === '[object Array]' ) {
       return true
@@ -19,14 +25,32 @@ var Lib = {
   //normal sketch group
   isGroup: function(item) {return [item isMemberOfClass:[MSLayerGroup class]]; },
 
-  isArtboard: function(item) {return [item isMemberOfClass:[MSArtboardGroup class]]; },
+  isArtboard: function(item) { return [item isMemberOfClass:[MSArtboardGroup class]]; },
 
   paste: function(value) {
     var pasteBoard = [NSPasteboard generalPasteboard];
     [pasteBoard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     [pasteBoard setString:value forType: NSStringPboardType];
   },
-
+  
+  save: function(name, value) {
+    var panel = [NSSavePanel savePanel];
+    
+    [panel setMessage:"Where do you want to place the class?"];
+    [panel setRequiredFileType: "swift"];
+    [panel setCanCreateDirectories: true];
+    if (name != null) {
+	  [panel setNameFieldStringValue: name];
+	}
+	
+    if ([panel runModal] == NSOKButton) {
+      var filePath = [panel filename];
+      var stringValue = [NSString stringWithFormat: @"%@", value];
+      
+      [stringValue writeToFile: filePath atomically: true encoding: NSUTF8StringEncoding error: null];
+    }
+  },
+  
   toFixed: function(number, precision) {
     var power = Math.pow(10, precision || 0);
     return String(Math.round(number * power)/power);
@@ -37,16 +61,16 @@ var Swift = {
   safeName: function(name) { return name.replaceAll(" ", "_") },
 
   wrapInFrameMethod: function(array, methodName) {
-    return ["func " + methodName + "(bounds: CGRect) -> CGPath {", array, "}"]
+    return ["\tfunc " + methodName + "(bounds: CGRect) -> CGPath {", array, "\t}\n"]
   },
 
   wrapInFrameMethodNoReturn: function(array, methodName) {
-    return ["func " + methodName + "(bounds: CGRect) {", array, "}"]
+    return ["\tfunc " + methodName + "(bounds: CGRect) {", array, "\t}"]
   },
 
   wrapInLazyVariable: function(name, array, type) {
     if(type == null) type = "CAShapeLayer"
-    return ["lazy var "+name+": " + type + " = {", array, "}()"]
+    return ["\tlazy var "+name+": " + type + " = {", array, "\t}()"]
   },
 
   _flattenArray: function(acc, value, index) {
@@ -55,7 +79,7 @@ var Swift = {
         Swift._flattenArray(acc, value[i], index + 1)
       }
     } else {
-      acc.push("\t".repeat(index) + value)
+      acc.push("\t\t".repeat(index) + value)
     }
   },
 
