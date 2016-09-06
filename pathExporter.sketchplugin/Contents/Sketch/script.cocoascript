@@ -5,9 +5,9 @@ var onRun = function(context) {
     Lib.alert("Select an object to export its data to the clipboard!");
     return;
   }
-  
+
   var loop = context.selection.objectEnumerator();
-  
+
   while(item = loop.nextObject() ){
     Lib.paste(Swift.flattenArray(processSelected(item)).toString());
   }
@@ -18,13 +18,13 @@ var onSave = function(context) {
     Lib.alert("Select an object to save the class on disk!");
     return;
   }
-  
+
   var loop = context.selection.objectEnumerator();
 
   while(item = loop.nextObject() ){
     var artboard = Lib.isArtboard(item) ? item : item.parentArtboard();
     var boardName = Swift.safeName(artboard.name());
-    
+
     Lib.save(boardName + "View", Swift.flattenArray(processSelected(item)).toString())
   }
 };
@@ -34,14 +34,14 @@ var processSelected = function(selected) {
   var artBoardLines	= processArtboard(artboard);
   var boardName = Swift.safeName(artboard.name());
   var classLines = ["import UIKit\n","@IBDesignable\n","class " + boardName + "View : UIView {"];
-  
+
   classLines = classLines.concat(artBoardLines);
   classLines.push("\n\toverride func layoutSubviews() {");
   classLines.push("\t\tdo"+ boardName + "Layout(self.bounds)");
   classLines.push("\t\tsuper.layoutSubviews()");
   classLines.push("\t}");
   classLines.push("}\n");
-  
+
   return classLines;
 }
 
@@ -53,7 +53,7 @@ var processArtboard = function(artboard) {
 
   var nameCode = []
   for(var i=0; i< layers.length; i++) {
-    var name = Swift.safeName(layers[i].name())    
+    var name = Swift.safeName(layers[i].name())
     var fill = getFill(layers[i])
 
     var namePath = name + "_path"
@@ -90,7 +90,7 @@ var processGroup = function(group, artboardFrame, artboardName, layersObjects) {
 
     if(Lib.isGroup(thing)) {
       var groupLayers = [];
-      
+
       swiftCode.push("\t// Group " + Swift.safeName(thing.name()))
       swiftCode = swiftCode.concat(processGroup(thing, artboardFrame, artboardName, groupLayers) )
       layersObjects = layersObjects.concat(groupLayers)
@@ -118,7 +118,7 @@ var processShape = function(thing, artboardFrame) {
     layerArray.push("l.fillColor = nil")
   }
   layerArray = layerArray.concat(["self.layer.addSublayer(l)", "return l"])
-  
+
   swiftCode.push("\t// " + shapeName + " shape")
   swiftCode = swiftCode.concat(Swift.wrapInLazyVariable(shapeName, layerArray))
 
@@ -143,7 +143,7 @@ var processShape = function(thing, artboardFrame) {
 
 var getFill = function(thing) {
   var style = thing.style();
-  var fills = style.fills().array()
+  var fills = style.fills()
 
   for(var i = fills.count() - 1; i >= 0; i--) {
     if(fills[i].isEnabled() && [0, 1].indexOf(fills[i].fillType()) >= 0 ) {
@@ -191,14 +191,14 @@ var extractStroke = function(style) {
   // Default stroke is nil, so no need to specify anything
   var array = []
 
-  var borders = style.borders().array()
+  var borders = style.borders()
 
   if (borders != null && borders.count() > 0) {
     var borderOptions = style.borderOptions()
     var lineJoin = borderOptions.lineJoinStyle();
     var lineCap = borderOptions.lineCapStyle();
     var dashPattern = borderOptions.dashPattern().componentsJoinedByString(",")
-    
+
     for(var i = borders.count() - 1; i >= 0; i--) {
       if(borders[i].isEnabled() && borders[i].position() == 0) {
         var color = borders[i].color();
@@ -217,7 +217,7 @@ var processShapePath = function(anything, boundsRect) {
   if(!Lib.isShape(anything)) { return null; }
 
   var swiftCode = ["let path = UIBezierPath()", "let wdtRatio = bounds.width/" + boundsRect.width(), "let hgtRatio = bounds.height/" + boundsRect.height()]
-  
+
   for (var j = 0; j < anything.layers().count(); j++) {
     var layer = anything.layers().objectAtIndex(j)
 
@@ -257,7 +257,7 @@ var addPoint = function(acc, layer, path, index, isFirst) {
   } else if(prev_abs_pointFrom || abs_pointTo) {
     var controlPoint = prev_abs_pointFrom || abs_pointTo
     acc.push("path.addQuadCurveToPoint("+relPointOffset(abs_point, offsetX, offsetY)+", controlPoint: "+relPointOffset(controlPoint, offsetX, offsetY)+")")
-  } 
+  }
   else {
     acc.push("path.addLineToPoint("+relPointOffset(abs_point, offsetX, offsetY)+")")
   }
@@ -278,7 +278,7 @@ var relRect = function(rect, frame) {
   var height = rect.height()
   var frame_width = frame.width()
   var frame_height = frame.height()
-  
+
   return "CGRect(x: " + Lib.toFixed(x, 2) +  " * bounds.width/"+Lib.toFixed(frame_width, 2) +
               ", y: " + Lib.toFixed(y, 2) + " * bounds.height/"+Lib.toFixed(frame_height, 2) +
               ", width: " + Lib.toFixed(width, 2) + " * bounds.width/"+Lib.toFixed(frame_width, 2) +
