@@ -14,13 +14,13 @@
       "shortcut" : "ctrl shift s",
       "name" : "Save to UIView",
       "identifier" : "pathSaver"
-    },
+    }
   ],
   "menu": {
     "items": [
       "pathExporter",
       "pathSaver"
-    ],
+    ]
   },
   "identifier" : "com.charimon.sketch.pathExporter",
   "version" : "2",
